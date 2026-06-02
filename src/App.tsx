@@ -4,7 +4,7 @@ import EligibilityPage  from "./pages/EligibilityPage";
 import PredictPage      from "./pages/PredictPage";
 import RequestPage      from "./pages/RequestPage";
 import FundVaultPage    from "./pages/FundVaultPage";
-import ReviewGrantsPage from "./pages/ReviewGrantsPage";
+//import ReviewGrantsPage from "./pages/ReviewGrantsPage";
 
 const NAV = [
   {
@@ -19,7 +19,7 @@ const NAV = [
     section: "Funder",
     links: [
       { to: "/vault",    label: "Fund Vault",    icon: "◆" },
-      { to: "/review",   label: "Review Grants", icon: "◇" },
+      /*{ to: "/review",   label: "Review Grants", icon: "◇" },*/
     ],
   },
 ];
@@ -32,7 +32,7 @@ export default function App() {
       <aside className="sidebar">
         <div className="sidebar-logo">
           <div className="logo-mark">on sui</div>
-          <div className="logo-name">SuiGrant</div>
+          <div className="logo-name">asKivFund</div>
         </div>
 
         <nav className="nav-section">
@@ -72,7 +72,7 @@ export default function App() {
           <Route path="/predict" element={<PredictPage />} />
           <Route path="/request" element={<RequestPage />} />
           <Route path="/vault"   element={<FundVaultPage />} />
-          <Route path="/review"  element={<ReviewGrantsPage />} />
+          {/* <Route path="/review"  element={<ReviewGrantsPage />} /> */}
         </Routes>
       </main>
     </div>

@@ -8,8 +8,22 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     define: {
-      // ✅ This securely and correctly formats your env values without crashing
       "process.env": JSON.stringify(env),
     },
+
+    server: {
+    proxy: {
+      "/walrus-publisher": {
+        target: "https://publisher.walrus-testnet.walrus.space",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/walrus-publisher/, ""),
+      },
+      "/walrus-aggregator": {
+        target: "https://aggregator.walrus-testnet.walrus.space",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/walrus-aggregator/, ""),
+      },
+    },
+  },
   };
 });

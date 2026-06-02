@@ -25,20 +25,52 @@ export default function PredictPage() {
     up: Direction.UP, flat: Direction.FLAT, down: Direction.DOWN,
   };
 
-  const handleSubmit = () => {
+  /*const handleSubmit = () => {
     if (!selected || !account) return;
     setLoading(true);
     setError(null);
 
     const tx = buildSubmitPredictionTx(PROFILE_ID, directionMap[selected]);
     signAndExecute(
-      { transaction: tx, options: { showEffects: true } },
+      { transaction: tx },
       {
         onSuccess: (result) => { setTxDigest(result.digest); setSubmitted(true); setLoading(false); },
         onError:   (err)    => { setError(err.message); setLoading(false); },
       }
     );
-  };
+  };*/
+
+  const handleSubmit = async () => {
+  if (!selected || !account) return;
+  setLoading(true);
+  setError(null);
+
+  try {
+    const tx = buildSubmitPredictionTx(PROFILE_ID, directionMap[selected]);
+
+    signAndExecute(
+      { 
+        // Force evaluation of the transaction instance into the expected structure
+        transaction: tx },
+      
+      {
+        onSuccess: (result) => { 
+          setTxDigest(result.digest); 
+          setSubmitted(true); 
+          setLoading(false); 
+        },
+        onError: (err) => { 
+          setError(err.message); 
+          setLoading(false); 
+        },
+      }
+    );
+  } catch (e: any) {
+    setError(e.message);
+    setLoading(false);
+  }
+};
+
 
   const options = [
     { dir: "up"   as PredDir, arrow: "↑", label: "Up",          sub: "+10% or more",  cls: "up"   },

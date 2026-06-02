@@ -22,8 +22,7 @@ export const ONE_SUI      = 1_000_000_000n;
 // Get your key at https://dashboard.tatum.io
 // Tatum gives you higher rate limits and reliability vs the public RPC
 
-//const TATUM_API_KEY = "t-6a1071776dcffd29f3320dc6-edb928e9b7704cb2be8551e2";
-const TATUM_API_KEY = import.meta.env.VITE_TATUM_API_KEY;
+const TATUM_API_KEY = import.meta.env.TATUM_API_KEY;
 const TATUM_RPC_URL = "https://sui-testnet.gateway.tatum.io";
 
 
@@ -47,8 +46,10 @@ const transport = new JsonRpcHTTPTransport({
 // Walrus publisher endpoint (community aggregator for testnet)
 // For mainnet, run your own or use a trusted aggregator
 
-const WALRUS_PUBLISHER = "https://publisher.walrus-testnet.walrus.space";
-const WALRUS_AGGREGATOR = "https://aggregator.walrus-testnet.walrus.space";
+// const WALRUS_PUBLISHER = "https://publisher.walrus-testnet.walrus.space";
+// const WALRUS_AGGREGATOR = "https://aggregator.walrus-testnet.walrus.space";
+const WALRUS_PUBLISHER  = "/walrus-publisher";
+const WALRUS_AGGREGATOR = "/walrus-aggregator";
 
 // Storage epochs — how long the blob is retained on Walrus
 // 1 epoch ≈ 1 week on testnet. Use 52 for ~1 year.

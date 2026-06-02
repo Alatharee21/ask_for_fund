@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCurrentAccount, useSignAndExecuteTransaction, Transaction } from "@mysten/dapp-kit";
+import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { buildCreateVaultTx, VaultConfig } from "../sdk/ask_for_fund-sdk";
 
 const MY_VAULTS = [
@@ -35,7 +35,7 @@ export default function FundVaultPage() {
 
     const tx = buildCreateVaultTx(config);
     signAndExecute(
-      { transaction: tx, requestOptions: { showEffects: true } },
+      { transaction: tx },
       {
         onSuccess: (result) => { setTxDigest(result.digest); setDeployed(true); setLoading(false); },
         onError:   (err)    => { setError(err.message); setLoading(false); },

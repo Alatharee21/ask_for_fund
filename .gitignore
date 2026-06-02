@@ -4,3 +4,6 @@ traces/*
 .coverage*
 Pub.*.toml
 node_modules/
+.env
+*.log
+*.tsbuildinfo

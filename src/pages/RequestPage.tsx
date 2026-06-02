@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { buildRequestGrantTx, GrantMemo } from "../sdk/ask_for_fund-sdk";
-import { Transaction } from "@mysten/sui/transactions";
+//import { Transaction } from "@mysten/sui/transactions";
 
 const MOCK_VAULTS = [
   { id: "0xVAULT1", name: "Community Fund A", minStreak: 7,  minBalSui: 500, maxGrantSui: 200, locked: 1200, streakReq: 7  },

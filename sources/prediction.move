@@ -20,7 +20,7 @@ module ask_for_fund::prediction {
     /// Price rose >= 10 % vs previous snapshot
     const DIR_UP:   u8 = 0;
     /// Price moved within ± 10 %
-    const DIR_FLAT: u8 = 1;
+    ///const DIR_FLAT: u8 = 1;
     /// Price fell >= 10 %
     const DIR_DOWN: u8 = 2;
 
