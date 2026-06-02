@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
+import { useCurrentAccount, useSignAndExecuteTransaction, Transaction } from "@mysten/dapp-kit";
 import { buildCreateVaultTx, VaultConfig } from "../sdk/ask_for_fund-sdk";
-import { Transaction } from "@mysten/sui/transactions";
 
 const MY_VAULTS = [
   { name: "Community Fund A", locked: 1200, dispersed: 340, active: true },

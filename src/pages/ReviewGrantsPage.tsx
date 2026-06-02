@@ -66,7 +66,7 @@ export default function ReviewGrantsPage() {
   const tx = new Transaction();
 
   tx.moveCall({
-    target: `0xYOUR_PACKAGE_ID::grant_module::approve_grant`,
+    target: `0x8aa86ab45973d8bcfc050555dce04b65b548891b3e714f6639915564af444d29::grant_module::approve_grant`,
     arguments: [
       tx.object(funderCap),
       tx.object(vaultId),
@@ -82,7 +82,7 @@ const buildDeclineGrantTx = (funderCap: string, vaultId: string, applicant: stri
   const tx = new Transaction();
 
   tx.moveCall({
-    target: `0xYOUR_PACKAGE_ID::grant_module::decline_grant`, // Use your actual package and function name
+    target: `PACKAGE_ID::grant_module::decline_grant`, // Use your actual package and function name
     arguments: [
       tx.object(funderCap),
       tx.object(vaultId),
