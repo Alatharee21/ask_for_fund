@@ -14,8 +14,8 @@ import { SuiJsonRpcClient, JsonRpcHTTPTransport } from "@mysten/sui/jsonRpc";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-export const PACKAGE_ID   = "0x8aa86ab45973d8bcfc050555dce04b65b548891b3e714f6639915564af444d29";
-export const ORACLE_STATE = "0x6ae3ce174c896ddc2f90e53134e7719b3a97d7a05a581287f32b57b4fff751f3";
+export const PACKAGE_ID   = "0xe75a26673c6560eb1eb44c4517f24d721ed899bf67e28c456c7c439d0f393d4d";
+export const ORACLE_STATE = "0x77d1be2d1abac9cc2f0dd031798fc51d54a5a4c6105c8ead63f9225fd806d2c7";
 export const ONE_SUI      = 1_000_000_000n;
 
 // ── Tatum RPC client ──────────────────────────────────────────────────────────
@@ -24,6 +24,7 @@ export const ONE_SUI      = 1_000_000_000n;
 
 const TATUM_API_KEY = import.meta.env.TATUM_API_KEY;
 const TATUM_RPC_URL = "https://sui-testnet.gateway.tatum.io";
+
 
 
 // Testnet client (swap in during development)

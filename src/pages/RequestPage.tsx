@@ -11,8 +11,8 @@ const MOCK_VAULTS = [
 
 const MOCK_STREAK  = 7;
 const MOCK_BALANCE = 412;
-const PROFILE_ID   = "0xYOUR_PROFILE_OBJECT_ID";
-const PROOF_COIN   = "0xYOUR_COIN_OBJECT_ID";
+const PROFILE_ID   = "0x762240b4fd2aefccddb53648d60669735b45c99761e25e34dfadc8d994eaac29";
+const PROOF_COIN   = "0x80446ffbecc419af2e2cf76b6096edfb78948781ad2099eeda4ee70dab7f4f09";
 
 export default function RequestPage() {
   const account = useCurrentAccount();
@@ -175,9 +175,9 @@ export default function RequestPage() {
 
               <hr className="divider" />
 
-              <div style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "12px 14px", marginBottom: 16, fontFamily: "var(--mono)", fontSize: 12, color: "var(--text2)" }}>
+              {/* <div style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "12px 14px", marginBottom: 16, fontFamily: "var(--mono)", fontSize: 12, color: "var(--text2)" }}>
                 ◈ Memo uploaded to Walrus (52 epochs ≈ 1 year) before the on-chain tx is signed. The 32-byte blob ID is stored in the smart contract.
-              </div>
+              </div> */}
 
               {error && (
                 <div style={{ color: "var(--red)", fontSize: 13, marginBottom: 12, fontFamily: "var(--mono)" }}>✗ {error}</div>

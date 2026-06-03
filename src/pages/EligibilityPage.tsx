@@ -10,23 +10,6 @@ interface ProfileData {
   isSettled: boolean;
 }
 
-const MOCK_STREAK_HISTORY = [
-  { day: 1,  result: "correct" },
-  { day: 2,  result: "correct" },
-  { day: 3,  result: "correct" },
-  { day: 4,  result: "wrong"   },
-  { day: 5,  result: "correct" },
-  { day: 6,  result: "correct" },
-  { day: 7,  result: "correct" },
-  { day: 8,  result: "correct" },
-  { day: 9,  result: "correct" },
-  { day: 10, result: "today"   },
-  { day: 11, result: "pending" },
-  { day: 12, result: "pending" },
-  { day: 13, result: "pending" },
-  { day: 14, result: "pending" },
-];
-
 export default function EligibilityPage() {
   const account = useCurrentAccount();
   const client  = useSuiClient();
@@ -42,11 +25,13 @@ export default function EligibilityPage() {
     if (!account) return;
     setLoading(true);
 
+    // Fetch SUI balance
     client
       .getBalance({ owner: account.address, coinType: "0x2::sui::SUI" })
       .then((b) => setBalance(Number(b.totalBalance) / 1_000_000_000))
       .catch(() => setBalance(0));
 
+    // Fetch prediction profile
     client
       .getOwnedObjects({
         owner: account.address,
@@ -64,6 +49,13 @@ export default function EligibilityPage() {
             totalSubmitted: Number(f.total_submitted),
             isSettled:      f.pending_settled,
           });
+        } else {
+          // Profile exists but no data yet — set all zeros
+          setProfile({
+            streak: 0, bestStreak: 0,
+            totalCorrect: 0, totalSubmitted: 0,
+            isSettled: true,
+          });
         }
       })
       .catch(() => {})
@@ -73,6 +65,44 @@ export default function EligibilityPage() {
   const balanceOk     = balance !== null && balance >= MIN_BALANCE_SUI;
   const streakOk      = profile !== null && profile.streak >= MIN_STREAK;
   const fullyEligible = balanceOk && streakOk;
+
+  // Build streak history dynamically from real data
+  const buildStreakHistory = () => {
+    if (!profile) return [];
+
+    const total     = profile.totalSubmitted;
+    const correct   = profile.totalCorrect;
+    const wrong     = total - correct;
+    const streak    = profile.streak;
+    const history   = [];
+
+    // Fill correct days based on current streak at the end
+    // Fill wrong days before the streak
+    const wrongDays   = Math.max(0, total - streak);
+    const correctDays = streak;
+
+    for (let i = 0; i < wrongDays; i++) {
+      history.push({ day: i + 1, result: "wrong" });
+    }
+    for (let i = 0; i < correctDays; i++) {
+      history.push({ day: wrongDays + i + 1, result: "correct" });
+    }
+
+    // Today slot
+    if (profile.isSettled) {
+      history.push({ day: total + 1, result: "today" });
+    }
+
+    // Pending future days to show target
+    const remaining = Math.max(0, MIN_STREAK - streak);
+    for (let i = 0; i < remaining; i++) {
+      history.push({ day: total + i + 2, result: "pending" });
+    }
+
+    return history;
+  };
+
+  const streakHistory = buildStreakHistory();
 
   return (
     <div className="page-enter">
@@ -92,6 +122,7 @@ export default function EligibilityPage() {
           </div>
         ) : (
           <>
+            {/* Status banner */}
             <div className="card" style={{
               border: fullyEligible ? "1px solid #4ade8040" : "1px solid #f5a62340",
               background: fullyEligible ? "#4ade8008" : "#f5a62308",
@@ -114,11 +145,12 @@ export default function EligibilityPage() {
               </div>
             </div>
 
+            {/* Stats */}
             <div className="stat-grid" style={{ marginBottom: "1.5rem" }}>
               <div className="stat-box">
                 <div className="stat-label">Wallet Balance</div>
                 <div className={`stat-value ${balanceOk ? "green" : "red"}`}>
-                  {loading ? "—" : balance !== null ? balance.toFixed(1) : "0"}
+                  {loading ? "—" : balance !== null ? balance.toFixed(2) : "0"}
                   <span style={{ fontSize: 13, fontWeight: 400, marginLeft: 4 }}>SUI</span>
                 </div>
               </div>
@@ -140,6 +172,7 @@ export default function EligibilityPage() {
               </div>
             </div>
 
+            {/* Requirements */}
             <div className="card">
               <div className="card-title">Requirements</div>
               <div className="row-between" style={{ padding: "10px 0", borderBottom: "1px solid var(--border)" }}>
@@ -162,43 +195,73 @@ export default function EligibilityPage() {
               </div>
             </div>
 
+            {/* Streak history */}
             <div className="card">
               <div className="card-title">Streak History</div>
               <div className="muted" style={{ marginBottom: "1rem", fontSize: 13 }}>
                 Daily SUI price direction predictions. A wrong answer resets your active streak.
               </div>
-              <div className="streak-row">
-                {MOCK_STREAK_HISTORY.map((d) => (
-                  <div key={d.day} className={`streak-dot ${d.result}`} title={`Day ${d.day}`}>
-                    {d.result === "correct" && "✓"}
-                    {d.result === "wrong"   && "✗"}
-                    {d.result === "today"   && "!"}
-                    {d.result === "pending" && "·"}
+
+              {profile?.totalSubmitted === 0 ? (
+                <div style={{
+                  textAlign: "center",
+                  padding: "2rem",
+                  color: "var(--text3)",
+                  fontFamily: "var(--mono)",
+                  fontSize: 13,
+                  border: "1px dashed var(--border)",
+                  borderRadius: "var(--radius)",
+                }}>
+                  No predictions yet — go to the Predict page to start your streak
+                </div>
+              ) : (
+                <>
+                  <div className="streak-row">
+                    {streakHistory.map((d, i) => (
+                      <div
+                        key={i}
+                        className={`streak-dot ${d.result}`}
+                        title={`Day ${d.day}`}
+                      >
+                        {d.result === "correct" && "✓"}
+                        {d.result === "wrong"   && "✗"}
+                        {d.result === "today"   && "!"}
+                        {d.result === "pending" && "·"}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <div style={{ fontSize: 12, color: "var(--text3)", marginTop: 8, fontFamily: "var(--mono)" }}>
-                Active streak: {profile?.streak ?? 5} consecutive correct — need {Math.max(0, MIN_STREAK - (profile?.streak ?? 5))} more
-              </div>
+
+                  <div style={{ fontSize: 12, color: "var(--text3)", marginTop: 8, fontFamily: "var(--mono)" }}>
+                    Active streak: {profile?.streak ?? 0} consecutive correct
+                    {profile && profile.streak < MIN_STREAK && ` — need ${MIN_STREAK - profile.streak} more`}
+                    {profile && profile.streak >= MIN_STREAK && " — qualified!"}
+                  </div>
+                </>
+              )}
             </div>
 
-            <div className="card">
-              <div className="card-title">How Verification Works</div>
-              {[
-                ["01", "Submit direction", "You pick UP / FLAT / DOWN on-chain each day with a gas fee"],
-                ["02", "Oracle settles",   "Pyth Network posts SUI/USD price at UTC 00:00"],
-                ["03", "Auto-graded",      "Smart contract compares your direction against actual movement"],
-                ["04", "Streak updates",   "Your on-chain profile NFT updates — streak or reset"],
-              ].map(([n, title, desc]) => (
-                <div key={n} className="row" style={{ padding: "10px 0", borderBottom: "1px solid var(--border)", gap: 16 }}>
-                  <div className="mono" style={{ color: "var(--amber)", fontSize: 12, minWidth: 24 }}>{n}</div>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: 14 }}>{title}</div>
-                    <div className="muted" style={{ fontSize: 13 }}>{desc}</div>
+            {/* Stats breakdown */}
+            {profile && profile.totalSubmitted > 0 && (
+              <div className="card">
+                <div className="card-title">Prediction Stats</div>
+                <div className="stat-grid">
+                  <div className="stat-box">
+                    <div className="stat-label">Total Submitted</div>
+                    <div className="stat-value">{profile.totalSubmitted}</div>
+                  </div>
+                  <div className="stat-box">
+                    <div className="stat-label">Total Correct</div>
+                    <div className="stat-value green">{profile.totalCorrect}</div>
+                  </div>
+                  <div className="stat-box">
+                    <div className="stat-label">Accuracy</div>
+                    <div className="stat-value amber">
+                      {Math.round((profile.totalCorrect / profile.totalSubmitted) * 100)}%
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </>
         )}
       </div>

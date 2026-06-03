@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { Routes, Route, NavLink } from "react-router-dom";
-import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
+import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
+import { buildCreateProfileTx, PACKAGE_ID } from "./sdk/ask_for_fund-sdk";
 import EligibilityPage  from "./pages/EligibilityPage";
 import PredictPage      from "./pages/PredictPage";
 import RequestPage      from "./pages/RequestPage";
@@ -24,15 +26,50 @@ const NAV = [
   },
 ];
 
+function ProfileAutoCreator() {
+  const account  = useCurrentAccount();
+  const client   = useSuiClient();
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+
+  useEffect(() => {
+    if (!account) return;
+
+    // Check if profile already exists
+    client.getOwnedObjects({
+      owner: account.address,
+      filter: { StructType: `${PACKAGE_ID}::prediction::PredictionProfile` },
+      options: { showContent: false },
+    }).then((res) => {
+      const exists = res.data.length > 0;
+      if (!exists) {
+        // Auto create profile silently
+        const tx = buildCreateProfileTx();
+        signAndExecute(
+          { transaction: tx },
+          {
+            onSuccess: () => console.log("✓ Prediction profile created"),
+            onError:   (e) => console.error("Profile creation failed:", e),
+          }
+        );
+      }
+    });
+  }, [account]);
+
+  return null; // renders nothing — just runs the effect
+}
+
 export default function App() {
   const account = useCurrentAccount();
 
   return (
     <div className="app-shell">
+      {/* Auto creates profile as soon as wallet connects */}
+      <ProfileAutoCreator />
+
       <aside className="sidebar">
         <div className="sidebar-logo">
           <div className="logo-mark">on sui</div>
-          <div className="logo-name">asKivFund</div>
+          <div className="logo-name">SuiGrant</div>
         </div>
 
         <nav className="nav-section">
@@ -72,7 +109,7 @@ export default function App() {
           <Route path="/predict" element={<PredictPage />} />
           <Route path="/request" element={<RequestPage />} />
           <Route path="/vault"   element={<FundVaultPage />} />
-          {/* <Route path="/review"  element={<ReviewGrantsPage />} /> */}
+          {/*<Route path="/review"  element={<ReviewGrantsPage />} />*/}
         </Routes>
       </main>
     </div>
