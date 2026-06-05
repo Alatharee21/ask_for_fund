@@ -107,7 +107,6 @@ export default function EligibilityPage() {
   return (
     <div className="page-enter">
       <div className="page-header">
-        <div className="page-eyebrow">Step 01</div>
         <div className="page-title">Eligibility Check</div>
         <div className="page-subtitle">
           Two on-chain requirements must be met before you can request a grant.

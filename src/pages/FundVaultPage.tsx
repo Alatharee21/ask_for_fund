@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { buildCreateVaultTx, VaultConfig } from "../sdk/ask_for_fund-sdk";
+import { parseError } from "../utils/errors";
 
 const MY_VAULTS = [
   { name: "Community Fund A", locked: 1200, dispersed: 340, active: true },
@@ -38,7 +39,7 @@ export default function FundVaultPage() {
       { transaction: tx },
       {
         onSuccess: (result) => { setTxDigest(result.digest); setDeployed(true); setLoading(false); },
-        onError:   (err)    => { setError(err.message); setLoading(false); },
+        onError:   (err)    => { setError(parseError(err.message)); setLoading(false); },
       }
     );
   };

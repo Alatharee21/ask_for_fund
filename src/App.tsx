@@ -1,12 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, type ComponentType } from "react";
 import { Routes, Route, NavLink } from "react-router-dom";
 import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
-import { buildCreateProfileTx, PACKAGE_ID } from "./sdk/ask_for_fund-sdk";
+import { buildCreateProfileTx, PACKAGE_ID, suiClient } from "./sdk/ask_for_fund-sdk";
 import EligibilityPage  from "./pages/EligibilityPage";
 import PredictPage      from "./pages/PredictPage";
 import RequestPage      from "./pages/RequestPage";
 import FundVaultPage    from "./pages/FundVaultPage";
-//import ReviewGrantsPage from "./pages/ReviewGrantsPage";
+import ReviewGrantsPage from "./pages/ReviewGrantsPage";
+
+const ReviewGrantsPageComponent = ReviewGrantsPage as ComponentType;
 
 const NAV = [
   {
@@ -21,7 +23,7 @@ const NAV = [
     section: "Funder",
     links: [
       { to: "/vault",    label: "Fund Vault",    icon: "◆" },
-      /*{ to: "/review",   label: "Review Grants", icon: "◇" },*/
+      { to: "/review",   label: "Review Grants", icon: "◇" },
     ],
   },
 ];
@@ -35,7 +37,7 @@ function ProfileAutoCreator() {
     if (!account) return;
 
     // Check if profile already exists
-    client.getOwnedObjects({
+    suiClient.getOwnedObjects({
       owner: account.address,
       filter: { StructType: `${PACKAGE_ID}::prediction::PredictionProfile` },
       options: { showContent: false },
@@ -69,7 +71,7 @@ export default function App() {
       <aside className="sidebar">
         <div className="sidebar-logo">
           <div className="logo-mark">on sui</div>
-          <div className="logo-name">SuiGrant</div>
+          <div className="logo-name">asKivFund</div>
         </div>
 
         <nav className="nav-section">
@@ -109,7 +111,7 @@ export default function App() {
           <Route path="/predict" element={<PredictPage />} />
           <Route path="/request" element={<RequestPage />} />
           <Route path="/vault"   element={<FundVaultPage />} />
-          {/*<Route path="/review"  element={<ReviewGrantsPage />} />*/}
+          <Route path="/review"  element={<ReviewGrantsPageComponent />} />
         </Routes>
       </main>
     </div>

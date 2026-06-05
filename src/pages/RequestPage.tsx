@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { buildRequestGrantTx, GrantMemo } from "../sdk/ask_for_fund-sdk";
-//import { Transaction } from "@mysten/sui/transactions";
+import { parseError } from "../utils/errors";
 
 const MOCK_VAULTS = [
   { id: "0xVAULT1", name: "Community Fund A", minStreak: 7,  minBalSui: 500, maxGrantSui: 200, locked: 1200, streakReq: 7  },
@@ -58,11 +58,11 @@ export default function RequestPage() {
         { transaction: tx },
         {
           onSuccess: (result) => { setTxDigest(result.digest); setSubmitted(true); setLoading(false); },
-          onError:   (err)    => { setError(err.message); setLoading(false); },
+          onError:   (err)    => { setError(parseError(err.message)); setLoading(false); },
         }
       );
     } catch (e: any) {
-      setError(e.message);
+      setError(parseError(e.message));
       setLoading(false);
     }
   };
@@ -70,7 +70,6 @@ export default function RequestPage() {
   return (
     <div className="page-enter">
       <div className="page-header">
-        <div className="page-eyebrow">Step 03</div>
         <div className="page-title">Request a Grant</div>
         <div className="page-subtitle">
           Your memo is stored on Walrus. Only the blob ID is written on-chain.

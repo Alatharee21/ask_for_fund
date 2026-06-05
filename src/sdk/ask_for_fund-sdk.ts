@@ -9,7 +9,6 @@
 /// <reference types="vite/client" />
 
 import { Transaction } from "@mysten/sui/transactions";
-//import { SuiClient, SuiHTTPTransport } from "@mysten/sui/client";
 import { SuiJsonRpcClient, JsonRpcHTTPTransport } from "@mysten/sui/jsonRpc";
 
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -22,24 +21,21 @@ export const ONE_SUI      = 1_000_000_000n;
 // Get your key at https://dashboard.tatum.io
 // Tatum gives you higher rate limits and reliability vs the public RPC
 
-const TATUM_API_KEY = import.meta.env.TATUM_API_KEY;
-const TATUM_RPC_URL = "https://sui-testnet.gateway.tatum.io";
+const TATUM_API_KEY = import.meta.env.VITE_TATUM_API_KEY as string;
+//const TATUM_RPC_URL = "/sui-rpc";
 
-
-
-// Testnet client (swap in during development)
-
-const transport = new JsonRpcHTTPTransport({
-    url: TATUM_API_KEY ? TATUM_RPC_URL : "https://fullnode.testnet.sui.io",
+export const suiClient = new SuiJsonRpcClient({
+  network: "testnet",
+  transport: new JsonRpcHTTPTransport({
+    url: TATUM_API_KEY
+      ? "/sui-rpc"
+      : "https://fullnode.testnet.sui.io",
     rpc: {
       headers: {
-      "x-api-key": TATUM_API_KEY || "", },
-  },
-});
-
-  export const client = new SuiJsonRpcClient({
-  transport: transport,
-  network: "testnet",
+        "x-api-key": TATUM_API_KEY || "",
+      },
+    },
+  }),
 });
 
 
@@ -307,7 +303,7 @@ export function buildWithdrawRequestTx(vaultObjectId: string): Transaction {
 // ── 9. Query: fetch profile ───────────────────────────────────────────────────
 
 export async function fetchProfile(profileObjectId: string) {
-  const obj    = await client.getObject({ id: profileObjectId, options: { showContent: true } });
+  const obj    = await suiClient.getObject({ id: profileObjectId, options: { showContent: true } });
   const fields = (obj.data?.content as any)?.fields;
   return {
     streak:         Number(fields.streak),
@@ -321,7 +317,7 @@ export async function fetchProfile(profileObjectId: string) {
 // ── 10. Query: fetch vault ────────────────────────────────────────────────────
 
 export async function fetchVault(vaultObjectId: string) {
-  const obj    = await client.getObject({ id: vaultObjectId, options: { showContent: true } });
+  const obj    = await suiClient.getObject({ id: vaultObjectId, options: { showContent: true } });
   const fields = (obj.data?.content as any)?.fields;
   return {
     name:               new TextDecoder().decode(Uint8Array.from(fields.name)),
@@ -349,11 +345,11 @@ export async function fetchVaultRequestsWithMemos(
   vaultObjectId: string
 ): Promise<EnrichedRequest[]> {
   // Get dynamic fields (the Table entries)
-  const fields = await client.getDynamicFields({ parentId: vaultObjectId });
+  const fields = await suiClient.getDynamicFields({ parentId: vaultObjectId });
 
   const requests = await Promise.all(
     fields.data.map(async (field) => {
-      const obj    = await client.getDynamicFieldObject({
+      const obj    = await suiClient.getDynamicFieldObject({
         parentId: vaultObjectId,
         name: field.name,
       });
@@ -390,7 +386,7 @@ export async function fetchVaultRequestsWithMemos(
 // ── 12. Find profile object for a wallet ─────────────────────────────────────
 
 export async function findProfileForAddress(walletAddress: string): Promise<string | null> {
-  const objects = await client.getOwnedObjects({
+  const objects = await suiClient.getOwnedObjects({
     owner: walletAddress,
     filter: { StructType: `${PACKAGE_ID}::prediction::PredictionProfile` },
     options: { showContent: false },

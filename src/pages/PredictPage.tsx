@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { buildSubmitPredictionTx, Direction, PACKAGE_ID } from "../sdk/ask_for_fund-sdk";
+import { parseError } from "../utils/errors";
 
 type PredDir = "up" | "flat" | "down" | null;
 
@@ -27,6 +28,8 @@ const [totalSubmitted, setTotalSubmitted] = useState<number>(0);
 // SUI/USD Pyth feed ID
 const SUI_FEED_ID = "0x23d7315113f5b1d3ba7a83604c44b94d79f4fd69af77f804fc7f920a6dc65744";
 
+const [alreadyPredicted, setAlreadyPredicted] = useState(false);
+const [pendingSettled,   setPendingSettled]   = useState(true);
 
 useEffect(() => {
   if (!account) return;
@@ -114,13 +117,18 @@ useEffect(() => {
       setProfileStatus("exists");
 
       // Extract streak data from the profile fields
-      if (obj.data.content && "fields" in obj.data.content) {
-        const f = (obj.data.content as any).fields;
-        setStreak(Number(f.streak));
-        setBestStreak(Number(f.best_streak));
-        setTotalCorrect(Number(f.total_correct));
-        setTotalSubmitted(Number(f.total_submitted));
-      }
+      // Inside checkProfile, after fetching profile fields:
+if (obj.data.content && "fields" in obj.data.content) {
+  const f        = (obj.data.content as any).fields;
+  const todayIdx = Math.floor(Date.now() / 86_400_000);
+
+  setStreak(Number(f.streak));
+  setBestStreak(Number(f.best_streak));
+  setTotalCorrect(Number(f.total_correct));
+  setTotalSubmitted(Number(f.total_submitted));
+  setPendingSettled(f.pending_settled);
+  setAlreadyPredicted(Number(f.last_day_index) === todayIdx);
+}
     } else {
       setProfileStatus("creating");
     }
@@ -153,7 +161,7 @@ useEffect(() => {
           setLoading(false); 
         },
         onError: (err) => { 
-          setError(err.message); 
+          setError(parseError(err.message)); 
           setLoading(false); 
         },
       }
@@ -174,7 +182,6 @@ useEffect(() => {
   return (
     <div className="page-enter">
       <div className="page-header">
-        <div className="page-eyebrow">Step 02</div>
         <div className="page-title">Daily Prediction</div>
         <div className="page-subtitle">
           Predict SUI's price direction for the next 24 hours. Gas fee required on-chain.
@@ -291,6 +298,36 @@ useEffect(() => {
                     Your prediction for next 24h
                   </div>
 
+                  {alreadyPredicted && (
+  <div style={{
+    background: "#f5a62310",
+    border: "1px solid #f5a62340",
+    borderRadius: "var(--radius)",
+    padding: "10px 14px",
+    marginBottom: 12,
+    fontFamily: "var(--mono)",
+    fontSize: 13,
+    color: "var(--amber)",
+  }}>
+    ⚠ You already predicted today. Come back after UTC 00:00.
+  </div>
+)}
+
+{!pendingSettled && (
+  <div style={{
+    background: "#f5a62310",
+    border: "1px solid #f5a62340",
+    borderRadius: "var(--radius)",
+    padding: "10px 14px",
+    marginBottom: 12,
+    fontFamily: "var(--mono)",
+    fontSize: 13,
+    color: "var(--amber)",
+  }}>
+    ⚠ Your previous prediction has not been settled yet. Wait for the oracle to post today's price.
+  </div>
+)}
+
                   <div className="predict-grid">
                     {options.map((o) => (
                       <div
@@ -338,16 +375,20 @@ useEffect(() => {
                       )}
 
                       <button
-                        className="btn btn-primary btn-full"
-                        onClick={handleSubmit}
-                        disabled={loading || !profileId}
-                      >
-                        {!profileId
-                          ? "No profile found — create one first"
-                          : loading
-                          ? "Submitting…"
-                          : "Submit prediction on-chain ↗"}
-                      </button>
+  className="btn btn-primary btn-full"
+  onClick={handleSubmit}
+  disabled={loading || !profileId || profileStatus === "creating" || alreadyPredicted || !pendingSettled}
+>
+  {alreadyPredicted
+    ? "Already predicted today"
+    : !pendingSettled
+    ? "Waiting for settlement…"
+    : profileStatus === "creating"
+    ? "Setting up profile…"
+    : loading
+    ? "Submitting…"
+    : "Submit prediction on-chain ↗"}
+</button>
                     </div>
                   )}
                 </>
