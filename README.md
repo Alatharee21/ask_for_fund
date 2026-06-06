@@ -58,11 +58,25 @@ I used Tatum API for blockchain interactions. Here's how I integrated it:
 
 ### Walrus Blob Storage Integration
 
-I used Walrus for decentralized blob storage. Here's how I integrated it:
+I used Walrus for decentralized blob storage to store grant memos on-chain. Here's how it's implemented across the project:
 
-1. Installed walrus SDK and using "suiup install walrus" to set up the Walrus publisher and aggregator services locally
-2. **Import credentials** in your code and use them to interact with the Walrus Blob Storage API (upload files, retrieve URLs, manage storage container)
-3. **Implement file uploads** to allow users to upload files to Walrus directly from the frontend, with API handling uploads and generating accessible URLs
+1. **Setup**: Installed Walrus SDK and configured publisher/aggregator services using `suiup install walrus`
+
+2. **Request Grant Page** (`RequestPage.tsx`):
+   - Users fill in grant details (title, description, requested amount, links)
+   - When submitting, the grant memo is serialized and uploaded to Walrus
+   - The returned `blobId` is stored on-chain in the GrantRequest smart contract
+   - The blob storage ensures immutable, decentralized access to grant details
+
+3. **Fund Vault Page** (`FundVaultPage.tsx`):
+   - Displays funded grants and their associated Walrus blob storage references
+   - Retrieves grant memos from Walrus using stored `blobId` values
+   - Users can view complete grant information directly from decentralized storage without relying on centralized servers
+
+4. **Helper Functions** (in SDK):
+   - `uploadGrantMemo()`: Uploads grant data to Walrus and returns blob ID for on-chain storage
+   - `fetchGrantMemo()`: Retrieves grant data from Walrus by blob ID
+   - `blobIdToBytes()`: Converts blob ID format for Move smart contract compatibility
 
 #### Walrus Configuration
 
