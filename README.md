@@ -6,7 +6,7 @@ Make sure to have **Node.js** and **npm** installed on your machine before runni
 ### Installation
 Clone the repository and install dependencies:
 ```bash
-git clone <repo-url>
+git clone https://github.com/Alatharee21/ask_for_fund
 cd ask_for_fund
 npm install
 ```
