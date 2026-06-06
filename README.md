@@ -60,7 +60,7 @@ I used Tatum API for blockchain interactions. Here's how I integrated it:
 
 I used Walrus for decentralized blob storage to store grant memos on-chain. Here's how it's implemented across the project:
 
-1. **Setup**: Installed Walrus SDK and configured publisher/aggregator services using `suiup install walrus`
+1. **Setup**: Configure Walrus publisher and aggregator endpoints in `vite.config.ts` (as shown in the code snippet below)
 
 2. **Request Grant Page** (`RequestPage.tsx`):
    - Users fill in grant details (title, description, requested amount, links)
